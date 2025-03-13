@@ -1,93 +1,76 @@
 # 🌤 Hava Durumu Uygulaması
 
-Bu uygulama, OpenWeatherMap API'sini kullanarak belirtilen şehrin hava durumu bilgilerini gösterir.
+Bu proje, OpenWeatherMap API kullanarak herhangi bir şehrin güncel hava durumu bilgilerini gösteren bir web uygulamasıdır.
 
-## ✨ Özellikler
+## Özellikler
 
-- 🏙 Şehir bazlı hava durumu bilgisi
-- 🌡 Sıcaklık (Celsius/Fahrenheit)
+- 🌍 Herhangi bir şehrin hava durumu bilgilerini görüntüleme
+- 🌡️ Sıcaklık birimini Celsius/Fahrenheit olarak değiştirme
 - 💧 Nem oranı
 - 💨 Rüzgar hızı
-- 📊 Hava basıncı
-- 🌤 Hava durumu açıklaması ve emoji gösterimi
-- 📝 JSON formatında çıktı alma
-- 🎨 Renkli ve emoji destekli terminal çıktısı
-- 🔧 Komut satırı parametreleri ile özelleştirme
+- 🌡️ Hissedilen sıcaklık
+- 📊 Atmosferik basınç
+- 🌤️ Hava durumu açıklaması ve emoji
+- 🌙 Karanlık mod desteği
+- 📱 Mobil uyumlu tasarım
 
-## 🚀 Kurulum
+## Kurulum
 
 1. Projeyi klonlayın:
-   ```bash
-   git clone https://github.com/kullaniciadi/weather-app.git
-   cd weather-app
-   ```
-
-2. OpenWeatherMap'ten bir API anahtarı alın (https://openweathermap.org/api)
-
-3. `.env` dosyası oluşturun ve API anahtarınızı ekleyin:
-   ```
-   OPENWEATHER_API_KEY=your_api_key_here
-   ```
-
-4. Uygulamayı derleyin:
-   ```bash
-   go build
-   ```
-
-5. Çalıştırma izinlerini ayarlayın:
-   ```bash
-   chmod +x weather-app
-   ```
-
-## 💻 Kullanım
-
-Temel kullanım:
 ```bash
+git clone https://github.com/kullaniciadi/weather-app.git
+cd weather-app
+```
+
+2. Gerekli bağımlılıkları yükleyin:
+```bash
+go mod download
+```
+
+3. `.env` dosyası oluşturun ve OpenWeatherMap API anahtarınızı ekleyin:
+```
+OPENWEATHER_API_KEY=your_api_key_here
+```
+
+4. Uygulamayı çalıştırın:
+```bash
+go build
 ./weather-app
 ```
 
-Şehir belirterek kullanım:
-```bash
-./weather-app -city="Ankara"
-```
+5. Tarayıcınızda `http://localhost:8080` adresine gidin.
 
-Fahrenheit cinsinden sıcaklık için:
-```bash
-./weather-app -unit=f
-```
+## API Anahtarı Alma
 
-JSON formatında çıktı almak için:
-```bash
-./weather-app -json
-```
+1. [OpenWeatherMap](https://openweathermap.org/) sitesine gidin
+2. Ücretsiz hesap oluşturun
+3. API anahtarınızı alın
+4. `.env` dosyasına ekleyin
 
-## ⚙️ Parametreler
+## Kullanım
 
-- `-city`: Hava durumu bilgisi alınacak şehir (varsayılan: Istanbul)
-- `-unit`: Sıcaklık birimi (c: Celsius, f: Fahrenheit) (varsayılan: c)
-- `-json`: JSON formatında çıktı ver (varsayılan: false)
+- Arama kutusuna şehir adını yazın ve "Ara" butonuna tıklayın
+- Sıcaklık birimini değiştirmek için "°C / °F" butonunu kullanın
+- Son aranan şehir otomatik olarak kaydedilir
 
-## 📋 Gereksinimler
+## Teknolojiler
 
-- Go 1.16 veya üzeri
-- OpenWeatherMap API anahtarı
-- Terminal emoji desteği (opsiyonel)
+- Go
+- Gin Web Framework
+- OpenWeatherMap API
+- HTML5
+- CSS3
+- JavaScript
+- Font Awesome
 
-## 🔍 Örnek Çıktı
+## Lisans
 
-```
-☀️ Istanbul Hava Durumu ☀️
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🌡 Sıcaklık: 22.5°C
-🤔 Hissedilen: 21.8°C
-💧 Nem: 65%
-💨 Rüzgar: 3.2 m/s
-📊 Basınç: 1015 hPa
-📝 Durum: açık
-🕒 Son Güncelleme: 15:30:45
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
 
-## 📝 Lisans
+## Katkıda Bulunma
 
-Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın. 
+1. Bu depoyu fork edin
+2. Yeni bir özellik dalı oluşturun (`git checkout -b yeni-ozellik`)
+3. Değişikliklerinizi commit edin (`git commit -am 'Yeni özellik eklendi'`)
+4. Dalınıza push yapın (`git push origin yeni-ozellik`)
+5. Bir Pull Request oluşturun

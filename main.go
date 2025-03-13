@@ -2,34 +2,45 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 // WeatherResponse OpenWeatherMap API'den gelen yanıtı temsil eder
 type WeatherResponse struct {
-	Main struct {
-		Temp      float64 `json:"temp"`
-		Humidity  int     `json:"humidity"`
-		Pressure  int     `json:"pressure"`
-		FeelsLike float64 `json:"feels_like"`
-	} `json:"main"`
 	Weather []struct {
 		Description string `json:"description"`
 		Icon        string `json:"icon"`
 	} `json:"weather"`
+	Main struct {
+		Temp      float64 `json:"temp"`
+		FeelsLike float64 `json:"feels_like"`
+		Humidity  int     `json:"humidity"`
+		Pressure  int     `json:"pressure"`
+	} `json:"main"`
 	Wind struct {
 		Speed float64 `json:"speed"`
 	} `json:"wind"`
-	Name    string `json:"name"`
-	Cod     int    `json:"cod"`
-	Message string `json:"message"`
+	Name string `json:"name"`
+	Cod  int    `json:"cod"`
+}
+
+type WeatherData struct {
+	City        string    `json:"city"`
+	Description string    `json:"description"`
+	Temperature float64   `json:"temperature"`
+	FeelsLike   float64   `json:"feels_like"`
+	Humidity    int       `json:"humidity"`
+	WindSpeed   float64   `json:"wind_speed"`
+	Pressure    int       `json:"pressure"`
+	Icon        string    `json:"icon"`
+	Timestamp   time.Time `json:"timestamp"`
 }
 
 func getWeatherEmoji(icon string) string {
@@ -62,106 +73,90 @@ func getWeatherEmoji(icon string) string {
 func main() {
 	// .env dosyasını yükle
 	if err := godotenv.Load(); err != nil {
-		fmt.Println("❌ Hata: .env dosyası yüklenemedi!")
-		os.Exit(1)
-	}
-
-	// Komut satırı parametrelerini tanımla
-	city := flag.String("city", "Istanbul", "Hava durumu bilgisi alınacak şehir")
-	unit := flag.String("unit", "c", "Sıcaklık birimi (c: Celsius, f: Fahrenheit)")
-	jsonOutput := flag.Bool("json", false, "JSON formatında çıktı ver")
-	flag.Parse()
-
-	// API anahtarını .env dosyasından oku
-	apiKey := os.Getenv("OPENWEATHER_API_KEY")
-	if apiKey == "" {
-		fmt.Println("❌ Hata: OPENWEATHER_API_KEY çevre değişkeni tanımlanmamış!")
-		fmt.Println("Lütfen .env dosyasını düzenleyin ve API anahtarınızı ekleyin.")
-		os.Exit(1)
-	}
-
-	// API URL'sini oluştur
-	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric&lang=tr", *city, apiKey)
-
-	// API'ye istek gönder
-	resp, err := http.Get(url)
-	if err != nil {
-		fmt.Printf("❌ Hata: API isteği başarısız oldu: %v\n", err)
-		os.Exit(1)
-	}
-	defer resp.Body.Close()
-
-	// Yanıtı oku
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Printf("❌ Hata: Yanıt okunamadı: %v\n", err)
-		os.Exit(1)
-	}
-
-	// Debug için API yanıtını göster
-	if resp.StatusCode != 200 {
-		fmt.Printf("❌ API Hatası (HTTP %d):\n%s\n", resp.StatusCode, string(body))
-		os.Exit(1)
-	}
-
-	// JSON'ı parse et
-	var weather WeatherResponse
-	if err := json.Unmarshal(body, &weather); err != nil {
-		fmt.Printf("❌ Hata: JSON ayrıştırılamadı: %v\n", err)
-		fmt.Printf("API Yanıtı:\n%s\n", string(body))
-		os.Exit(1)
-	}
-
-	// API hata kontrolü
-	if weather.Cod != 200 {
-		fmt.Printf("❌ API Hatası: %s\n", weather.Message)
-		os.Exit(1)
-	}
-
-	// Weather array kontrolü
-	if len(weather.Weather) == 0 {
-		fmt.Println("❌ Hata: Hava durumu verisi bulunamadı!")
-		os.Exit(1)
-	}
-
-	// Sıcaklığı dönüştür
-	temp := weather.Main.Temp
-	feelsLike := weather.Main.FeelsLike
-	if *unit == "f" {
-		temp = (temp * 9 / 5) + 32
-		feelsLike = (feelsLike * 9 / 5) + 32
-	}
-
-	if *jsonOutput {
-		// JSON çıktısı
-		output := map[string]interface{}{
-			"city":        weather.Name,
-			"temperature": temp,
-			"feels_like":  feelsLike,
-			"humidity":    weather.Main.Humidity,
-			"pressure":    weather.Main.Pressure,
-			"wind_speed":  weather.Wind.Speed,
-			"description": weather.Weather[0].Description,
-			"icon":        weather.Weather[0].Icon,
-			"timestamp":   time.Now().Format(time.RFC3339),
-		}
-		jsonData, _ := json.MarshalIndent(output, "", "  ")
-		fmt.Println(string(jsonData))
+		fmt.Println("❌ .env dosyası yüklenemedi:", err)
 		return
 	}
 
-	// Normal çıktı
-	emoji := getWeatherEmoji(weather.Weather[0].Icon)
-	fmt.Printf("\n%s %s Hava Durumu %s\n", emoji, weather.Name, emoji)
-	fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
-	fmt.Printf("🌡 Sıcaklık: %.1f°%s\n", temp, getUnitSymbol(*unit))
-	fmt.Printf("🤔 Hissedilen: %.1f°%s\n", feelsLike, getUnitSymbol(*unit))
-	fmt.Printf("💧 Nem: %d%%\n", weather.Main.Humidity)
-	fmt.Printf("💨 Rüzgar: %.1f m/s\n", weather.Wind.Speed)
-	fmt.Printf("📊 Basınç: %d hPa\n", weather.Main.Pressure)
-	fmt.Printf("📝 Durum: %s\n", weather.Weather[0].Description)
-	fmt.Printf("🕒 Son Güncelleme: %s\n", time.Now().Format("15:04:05"))
-	fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+	// API anahtarını al
+	apiKey := os.Getenv("OPENWEATHER_API_KEY")
+	if apiKey == "" {
+		fmt.Println("❌ OPENWEATHER_API_KEY bulunamadı")
+		return
+	}
+
+	// Gin web sunucusunu başlat
+	r := gin.Default()
+
+	// Statik dosyaları sun
+	r.Static("/static", "./static")
+	r.LoadHTMLGlob("templates/*")
+
+	// Ana sayfa
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
+	})
+
+	// Hava durumu API endpoint'i
+	r.GET("/weather", func(c *gin.Context) {
+		city := c.DefaultQuery("city", "Istanbul")
+		unit := c.DefaultQuery("unit", "c")
+
+		// API URL'sini oluştur
+		url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric&lang=tr", city, apiKey)
+
+		// API'ye istek gönder
+		resp, err := http.Get(url)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "API isteği başarısız oldu"})
+			return
+		}
+		defer resp.Body.Close()
+
+		// API yanıtını oku
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "API yanıtı okunamadı"})
+			return
+		}
+
+		// API yanıtını parse et
+		var weatherResp WeatherResponse
+		if err := json.Unmarshal(body, &weatherResp); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "API yanıtı işlenemedi"})
+			return
+		}
+
+		// API hata kontrolü
+		if weatherResp.Cod != 200 {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Şehir bulunamadı"})
+			return
+		}
+
+		// Hava durumu verilerini hazırla
+		weatherData := WeatherData{
+			City:        weatherResp.Name,
+			Description: weatherResp.Weather[0].Description,
+			Temperature: weatherResp.Main.Temp,
+			FeelsLike:   weatherResp.Main.FeelsLike,
+			Humidity:    weatherResp.Main.Humidity,
+			WindSpeed:   weatherResp.Wind.Speed,
+			Pressure:    weatherResp.Main.Pressure,
+			Icon:        weatherResp.Weather[0].Icon,
+			Timestamp:   time.Now(),
+		}
+
+		// Fahrenheit'a çevir
+		if unit == "f" {
+			weatherData.Temperature = (weatherData.Temperature * 9 / 5) + 32
+			weatherData.FeelsLike = (weatherData.FeelsLike * 9 / 5) + 32
+		}
+
+		c.JSON(http.StatusOK, weatherData)
+	})
+
+	// Sunucuyu başlat
+	fmt.Println("🌐 Web sunucusu başlatılıyor... http://localhost:8080")
+	r.Run(":8080")
 }
 
 func getUnitSymbol(unit string) string {

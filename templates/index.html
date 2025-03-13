@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌤 Hava Durumu Uygulaması</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="weather-card">
+            <h1>
+                <i class="fas fa-cloud-sun"></i>
+                Hava Durumu
+            </h1>
+            <div class="search-box">
+                <div class="input-group">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="cityInput" placeholder="Şehir adı girin..." autocomplete="off">
+                </div>
+                <button onclick="getWeather()">
+                    <i class="fas fa-search"></i>
+                    Ara
+                </button>
+            </div>
+            <div class="weather-info" id="weatherInfo">
+                <div class="loading" id="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Yükleniyor...
+                </div>
+            </div>
+            <div class="unit-toggle">
+                <button onclick="toggleUnit()" id="unitToggle">
+                    <i class="fas fa-temperature-high"></i>
+                    °C / °F
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/main.js"></script>
+</body>
+</html> 

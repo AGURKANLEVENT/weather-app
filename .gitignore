@@ -5,4 +5,14 @@
 weather-app
 
 # Go modül önbelleği
-go.sum 
+go.sum
+
+# IDE dosyaları
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Sistem dosyaları
+.DS_Store
+Thumbs.db 
