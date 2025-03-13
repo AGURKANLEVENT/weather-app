@@ -1,0 +1,8 @@
+# .env dosyası
+.env
+
+# Derlenmiş dosyalar
+weather-app
+
+# Go modül önbelleği
+go.sum 
